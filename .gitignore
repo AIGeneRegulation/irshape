@@ -1,0 +1,7 @@
+__pycache__/
+*.pyc
+*.egg-info/
+build/
+dist/
+*.sif
+irshape-ref-GRCh38-gencodeV44/

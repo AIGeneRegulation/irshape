@@ -1,0 +1,77 @@
+Bootstrap: localimage
+From: build/python_3.10-slim.sif
+# Base image is pre-pulled on the LOGIN node (pure byte transfer, allowed --
+# see CLAUDE.md) via:
+#   module load containers/Apptainer/1.4.1
+#   apptainer pull build/python_3.10-slim.sif docker://python:3.10-slim
+# Compute nodes have no route to Docker Hub (CLAUDE.md: only pypi/github/npm/
+# ubuntu reachable from compute) -- `Bootstrap: docker` would hang/fail there.
+# The actual image build (apt-get + pip, both pypi/ubuntu-mirror -- allowed
+# from compute) runs from this local base on a compute node/SLURM job.
+
+%labels
+    Application irshape
+    Description Intron retention measurement engine (IRFinder-principle, corrected masking, coverage-shape aware)
+
+%setup
+    # This cluster auto-binds host paths (e.g. /work/project) into the build
+    # container; the minimal python:3.10-slim base doesn't have those
+    # mountpoints, which makes the bind (and the whole build) fail before
+    # %post even runs. Pre-create them directly in the rootfs from the host
+    # side, before any container namespace/mount is set up.
+    mkdir -p ${APPTAINER_ROOTFS}/work/project
+    mkdir -p ${APPTAINER_ROOTFS}/work
+    mkdir -p ${APPTAINER_ROOTFS}/tools
+    mkdir -p ${APPTAINER_ROOTFS}/usr/lpp/mmfs
+
+%files
+    pyproject.toml /opt/irshape/pyproject.toml
+    README.md /opt/irshape/README.md
+    SCHEMA.md /opt/irshape/SCHEMA.md
+    irshape /opt/irshape/irshape
+
+%post
+    set -eu
+    apt-get update
+    apt-get install -y --no-install-recommends \
+        build-essential zlib1g-dev libbz2-dev liblzma-dev libcurl4-openssl-dev
+    rm -rf /var/lib/apt/lists/*
+
+    # Pinned to the exact versions the engine was developed/validated against
+    # (see results/engine_block*_validation.md) -- same pins as Dockerfile.
+    pip install --no-cache-dir \
+        numpy==2.2.6 \
+        pandas==2.3.3 \
+        pysam==0.22.1 \
+        pyBigWig==0.3.25
+    pip install --no-cache-dir --no-deps -e /opt/irshape
+
+    mkdir -p /ref
+
+%environment
+    # Reference data is NOT baked into the image -- bind-mount an
+    # irshape-ref-GRCh38-gencodeV44/ bundle at /ref (or anywhere, and pass
+    # --ref-dir explicitly), see build_reference_bundle.py.
+    export IRSHAPE_REF=/ref
+
+%runscript
+    exec irshape "$@"
+
+%test
+    irshape --help >/dev/null
+    echo "irshape --help OK"
+
+%help
+    irshape: intron retention measurement engine (recount3-scale, no BAM
+    download/alignment needed; corrected masking + coverage-shape layer).
+
+    Reference data is external -- download irshape-ref-GRCh38-gencodeV44/
+    separately (build_reference_bundle.py builds it; see
+    README.md for the download location) and bind it in:
+
+        apptainer run --bind /path/to/irshape-ref-GRCh38-gencodeV44:/ref \
+            irshape.sif run --input recount3 --bigwigs a.bw,b.bw \
+            --junctions junctions.tsv --out out.tsv
+
+    Or bind it at any path and point --ref-dir there instead of relying on
+    the default /ref mount.

@@ -1,0 +1,31 @@
+cff-version: 1.2.0
+message: "If you use irshape, please cite the software and the accompanying manuscript."
+title: "irshape: a corrected, coverage-shape-aware intron retention engine"
+abstract: >
+  irshape quantifies intron retention (IR) directly from recount3's precomputed
+  coverage, applying a corrected intronic mask and a per-length-tier
+  coverage-shape layer on top of the IRFinder principle.
+type: software
+version: 1.0.0
+date-released: "2026-01-01"
+license: MIT
+repository-code: "<GITHUB URL PLACEHOLDER — fill in after repo is public>"
+authors:
+  - family-names: "TITLE-CASE-FAMILY-NAME-PLACEHOLDER"
+    given-names: "GIVEN-NAME-PLACEHOLDER"
+    affiliation: "Centre National de la Recherche Scientifique (CNRS)"
+    orcid: "https://orcid.org/0000-0000-0000-0000"
+identifiers:
+  - type: doi
+    value: "10.5281/zenodo.PLACEHOLDER"
+    description: "Zenodo archive of the reference bundle + container used in the manuscript (fill in after deposit publication)"
+preferred-citation:
+  type: article
+  title: "MANUSCRIPT TITLE PLACEHOLDER — fill in from the accepted/preprint manuscript"
+  authors:
+    - family-names: "TITLE-CASE-FAMILY-NAME-PLACEHOLDER"
+      given-names: "GIVEN-NAME-PLACEHOLDER"
+      affiliation: "Centre National de la Recherche Scientifique (CNRS)"
+  year: 2026
+  journal: "JOURNAL PLACEHOLDER"
+  doi: "10.0000/PLACEHOLDER"

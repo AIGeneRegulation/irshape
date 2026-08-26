@@ -1,0 +1,23 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "irshape"
+version = "1.0.0"
+description = "Intron retention measurement engine: IRFinder-principle, corrected masking, coverage-shape aware."
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.9"
+dependencies = [
+    "numpy",
+    "pandas",
+    "pysam",
+    "pyBigWig",
+]
+
+[project.scripts]
+irshape = "irshape.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["irshape*"]
